@@ -6,9 +6,9 @@ export default async function TransacoesPage() {
   const supabase = await createClient()
 
   const { data: categorias } = await supabase
-    .from('categorias')
-    .select('id, nome')
-    .order('nome')
+  .from('categorias')
+  .select('id, nome, user_id')
+  .order('nome')
 
   const { data: transacoes } = await supabase
     .from('transacoes')

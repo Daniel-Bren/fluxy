@@ -1,22 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { criarTransacao } from '@/app/dashboard/transacoes/actions'
+import { criarTransacao, criarCategoria, deletarCategoria } from '@/app/dashboard/transacoes/actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { X } from 'lucide-react'
+import { X, Plus, Trash2, Settings } from 'lucide-react'
 
 type Categoria = {
   id: string
   nome: string
+  user_id: string | null
 }
 
 type Props = {
   categorias: Categoria[]
 }
 
-export default function NovaTransacaoModal({ categorias }: Props) {
+export default function NovaTransacaoModal({ categorias: categoriasProp }: Props) {
   const [aberto, setAberto] = useState(false)
   const [tipo, setTipo] = useState<'entrada' | 'saida'>('entrada')
   const [erro, setErro] = useState('')
@@ -25,6 +26,14 @@ export default function NovaTransacaoModal({ categorias }: Props) {
   const hoje = new Date()
   const dataHoje = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
   const [data, setData] = useState(dataHoje)
+
+  const [categorias, setCategorias] = useState<Categoria[]>(categoriasProp)
+  const [novaCategoria, setNovaCategoria] = useState('')
+  const [criandoCategoria, setCriandoCategoria] = useState(false)
+  const [mostrarNovaCategoria, setMostrarNovaCategoria] = useState(false)
+  const [gerenciando, setGerenciando] = useState(false)
+
+  const categoriasPessoais = categorias.filter(c => c.user_id)
 
   async function handleSubmit(formData: FormData) {
     setErro('')
@@ -44,6 +53,34 @@ export default function NovaTransacaoModal({ categorias }: Props) {
     setCarregando(false)
   }
 
+  async function handleCriarCategoria() {
+    if (!novaCategoria.trim()) return
+    setCriandoCategoria(true)
+
+    const resultado = await criarCategoria(novaCategoria)
+
+    if (resultado?.erro) {
+      setErro(resultado.erro)
+      setCriandoCategoria(false)
+      return
+    }
+
+    if (resultado.categoria) {
+      setCategorias((prev) => [...prev, resultado.categoria as Categoria])
+    }
+
+    setNovaCategoria('')
+    setMostrarNovaCategoria(false)
+    setCriandoCategoria(false)
+  }
+
+  async function handleDeletarCategoria(id: string) {
+    const resultado = await deletarCategoria(id)
+    if (resultado?.sucesso) {
+      setCategorias((prev) => prev.filter((c) => c.id !== id))
+    }
+  }
+
   return (
     <>
       <Button
@@ -60,7 +97,7 @@ export default function NovaTransacaoModal({ categorias }: Props) {
             onClick={() => setAberto(false)}
           />
 
-          <div className="relative bg-white rounded-2xl p-6 w-full max-w-md shadow-xl z-10">
+          <div className="relative bg-white rounded-2xl p-6 w-full max-w-md shadow-xl z-10 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-[#111827]">
                 Nova Transação
@@ -128,7 +165,30 @@ export default function NovaTransacaoModal({ categorias }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="categoria_id">Categoria</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="categoria_id">Categoria</Label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setMostrarNovaCategoria(!mostrarNovaCategoria)}
+                      className="text-xs text-[#2563EB] hover:underline flex items-center gap-1"
+                    >
+                      <Plus size={12} />
+                      Nova
+                    </button>
+                    {categoriasPessoais.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setGerenciando(!gerenciando)}
+                        className="text-xs text-[#6B7280] hover:text-[#111827] flex items-center gap-1"
+                      >
+                        <Settings size={12} />
+                        Gerenciar
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <select
                   id="categoria_id"
                   name="categoria_id"
@@ -142,6 +202,54 @@ export default function NovaTransacaoModal({ categorias }: Props) {
                     </option>
                   ))}
                 </select>
+
+                {/* Campo nova categoria */}
+                {mostrarNovaCategoria && (
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Nome da categoria"
+                      value={novaCategoria}
+                      onChange={(e) => setNovaCategoria(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleCriarCategoria())}
+                      className="text-sm"
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleCriarCategoria}
+                      disabled={criandoCategoria}
+                      className="bg-[#2563EB] hover:bg-[#1d4ed8] shrink-0"
+                    >
+                      <Plus size={16} />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setMostrarNovaCategoria(false)}
+                      className="shrink-0"
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                )}
+
+                {/* Gerenciar categorias pessoais */}
+                {gerenciando && categoriasPessoais.length > 0 && (
+                  <div className="border border-gray-100 rounded-lg overflow-hidden">
+                    {categoriasPessoais.map((cat) => (
+                      <div key={cat.id} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 border-b border-gray-50 last:border-0">
+                        <span className="text-xs text-[#111827]">{cat.nome}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletarCategoria(cat.id)}
+                          className="text-[#6B7280] hover:text-[#DC2626] transition-colors"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

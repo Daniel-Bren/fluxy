@@ -5,14 +5,12 @@ import { logout } from './actions'
 import {
   LayoutDashboard,
   ArrowLeftRight,
-  Tag,
   LogOut,
 } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Transações', href: '/dashboard/transacoes', icon: ArrowLeftRight },
-  { label: 'Categorias', href: '/dashboard/categorias', icon: Tag },
 ]
 
 export default async function DashboardLayout({
