@@ -40,7 +40,7 @@ export default async function TransacoesPage() {
 
       {/* Lista */}
       <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <ListaTransacoes transacoes={transacoes ?? []} />
+        <ListaTransacoes transacoes={(transacoes ?? []) as any} />
       </div>
     </div>
   )
