@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import SeletorMes from '@/components/seletor-mes'
+import GraficoCategorias from '@/components/grafico-categorias'
 import { Suspense } from 'react'
 
 type Props = {
@@ -43,6 +44,18 @@ export default async function DashboardPage({ searchParams }: Props) {
     .order('data', { ascending: false })
     .limit(5)
 
+  const { data: gastosPorCategoria } = await supabase
+    .from('transacoes')
+    .select(`
+      valor,
+      categorias (
+        nome
+      )
+    `)
+    .eq('tipo', 'saida')
+    .gte('data', primeiroDia)
+    .lte('data', ultimoDia)
+
   const totalEntradas = transacoes
     ?.filter((t) => t.tipo === 'entrada')
     .reduce((acc, t) => acc + Number(t.valor), 0) ?? 0
@@ -54,6 +67,17 @@ export default async function DashboardPage({ searchParams }: Props) {
   const saldo = totalEntradas - totalSaidas
 
   const mesAtual = dataRef.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+
+  // Agrupa gastos por categoria
+  const categoriaMap: Record<string, number> = {}
+  for (const t of gastosPorCategoria ?? []) {
+  const cat = t.categorias as any
+  const nome = (Array.isArray(cat) ? cat[0]?.nome : cat?.nome) ?? 'Outros'
+  categoriaMap[nome] = (categoriaMap[nome] ?? 0) + Number(t.valor)
+  }
+  const dadosGrafico = Object.entries(categoriaMap)
+    .map(([nome, valor]) => ({ nome, valor }))
+    .sort((a, b) => b.valor - a.valor)
 
   function formatarMoeda(valor: number) {
     return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -102,51 +126,58 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-[#111827]">Transações recentes</h2>
-          <a href="/dashboard/transacoes" className="text-sm text-[#2563EB] hover:underline">
-            Ver todas
-          </a>
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <h2 className="text-lg font-semibold text-[#111827] mb-4">Gastos por categoria</h2>
+          <GraficoCategorias dados={dadosGrafico} />
         </div>
 
-        {transacoesRecentes && transacoesRecentes.length > 0 ? (
-          <div className="space-y-3">
-            {(transacoesRecentes as any[]).map((t) => (
-              <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    t.tipo === 'entrada' ? 'bg-green-50' : 'bg-red-50'
-                  }`}>
-                    <span className={`text-xs font-bold ${
-                      t.tipo === 'entrada' ? 'text-[#16A34A]' : 'text-[#DC2626]'
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-[#111827]">Transações recentes</h2>
+            <a href="/dashboard/transacoes" className="text-sm text-[#2563EB] hover:underline">
+              Ver todas
+            </a>
+          </div>
+
+          {transacoesRecentes && transacoesRecentes.length > 0 ? (
+            <div className="space-y-3">
+              {(transacoesRecentes as any[]).map((t) => (
+                <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      t.tipo === 'entrada' ? 'bg-green-50' : 'bg-red-50'
                     }`}>
-                      {t.tipo === 'entrada' ? '↓' : '↑'}
-                    </span>
+                      <span className={`text-xs font-bold ${
+                        t.tipo === 'entrada' ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                      }`}>
+                        {t.tipo === 'entrada' ? '↓' : '↑'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-[#111827]">
+                        {t.descricao || t.categorias?.[0]?.nome || '—'}
+                      </p>
+                      <p className="text-xs text-[#6B7280]">
+                        {new Date(t.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#111827]">
-                      {t.descricao || t.categorias?.[0]?.nome || '—'}
-                    </p>
-                    <p className="text-xs text-[#6B7280]">
-                      {new Date(t.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
-                    </p>
-                  </div>
+                  <span className={`text-sm font-semibold ${
+                    t.tipo === 'entrada' ? 'text-[#16A34A]' : 'text-[#DC2626]'
+                  }`}>
+                    {t.tipo === 'saida' ? '- ' : ''}
+                    {Number(t.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
                 </div>
-                <span className={`text-sm font-semibold ${
-                  t.tipo === 'entrada' ? 'text-[#16A34A]' : 'text-[#DC2626]'
-                }`}>
-                  {t.tipo === 'saida' ? '- ' : ''}
-                  {Number(t.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-[#6B7280] text-sm">
-            Nenhuma transação ainda. Adicione a primeira!
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-[#6B7280] text-sm">
+              Nenhuma transação ainda. Adicione a primeira!
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
