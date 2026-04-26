@@ -32,6 +32,7 @@ export default function NovaTransacaoModal({ categorias: categoriasProp }: Props
   const [criandoCategoria, setCriandoCategoria] = useState(false)
   const [mostrarNovaCategoria, setMostrarNovaCategoria] = useState(false)
   const [gerenciando, setGerenciando] = useState(false)
+  const [recorrente, setRecorrente] = useState(false)
 
   const categoriasPessoais = categorias.filter(c => c.user_id)
 
@@ -262,14 +263,34 @@ export default function NovaTransacaoModal({ categorias: categoriasProp }: Props
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  id="recorrente"
-                  name="recorrente"
-                  type="checkbox"
-                  className="rounded border-gray-300"
-                />
-                <Label htmlFor="recorrente">Transação recorrente</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="recorrente"
+                    name="recorrente"
+                    type="checkbox"
+                    className="rounded border-gray-300"
+                    onChange={(e) => setRecorrente(e.target.checked)}
+                  />
+                  <Label htmlFor="recorrente">Transação recorrente</Label>
+                </div>
+
+                {recorrente && (
+                  <div className="flex items-center gap-2 pl-6">
+                    <Input
+                      id="meses_recorrencia"
+                      name="meses_recorrencia"
+                      type="number"
+                      min="2"
+                      max="120"
+                      placeholder="Ex: 12"
+                      className="w-24 text-sm"
+                    />
+                    <Label htmlFor="meses_recorrencia" className="text-sm text-[#6B7280]">
+                      meses
+                    </Label>
+                  </div>
+                )}
               </div>
 
               {erro && <p className="text-sm text-[#DC2626]">{erro}</p>}

@@ -15,6 +15,7 @@ export async function criarTransacao(formData: FormData) {
   const categoria_id = formData.get('categoria_id') as string
   const descricao = formData.get('descricao') as string
   const recorrente = formData.get('recorrente') === 'on'
+  const mesesRecorrencia = recorrente ? parseInt(formData.get('meses_recorrencia') as string) || 12 : 1
 
   if (!tipo || !valor || !data || !categoria_id) {
     return { erro: 'Preencha todos os campos obrigatórios.' }
@@ -26,7 +27,7 @@ export async function criarTransacao(formData: FormData) {
 
     const [ano, mes, dia] = data.split('-').map(Number)
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < mesesRecorrencia; i++) {
       const novaData = new Date(ano, mes - 1 + i, dia)
       const dataFormatada = `${novaData.getFullYear()}-${String(novaData.getMonth() + 1).padStart(2, '0')}-${String(novaData.getDate()).padStart(2, '0')}`
 
