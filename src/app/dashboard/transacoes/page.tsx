@@ -31,6 +31,8 @@ export default async function TransacoesPage({ searchParams }: Props) {
       valor,
       data,
       descricao,
+      recorrente,
+      recorrencia_id,
       categorias (
         nome
       )

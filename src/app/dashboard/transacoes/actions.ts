@@ -20,17 +20,44 @@ export async function criarTransacao(formData: FormData) {
     return { erro: 'Preencha todos os campos obrigatórios.' }
   }
 
-  const { error } = await supabase.from('transacoes').insert({
-    user_id: user.id,
-    tipo,
-    valor,
-    data,
-    categoria_id,
-    descricao,
-    recorrente,
-  })
+  if (recorrente) {
+    const recorrencia_id = crypto.randomUUID()
+    const registros = []
 
-  if (error) return { erro: error.message }
+    const [ano, mes, dia] = data.split('-').map(Number)
+
+    for (let i = 0; i < 12; i++) {
+      const novaData = new Date(ano, mes - 1 + i, dia)
+      const dataFormatada = `${novaData.getFullYear()}-${String(novaData.getMonth() + 1).padStart(2, '0')}-${String(novaData.getDate()).padStart(2, '0')}`
+
+      registros.push({
+        user_id: user.id,
+        tipo,
+        valor,
+        data: dataFormatada,
+        categoria_id,
+        descricao,
+        recorrente: true,
+        recorrencia_id,
+        recorrencia_origem: i === 0,
+      })
+    }
+
+    const { error } = await supabase.from('transacoes').insert(registros)
+    if (error) return { erro: error.message }
+
+  } else {
+    const { error } = await supabase.from('transacoes').insert({
+      user_id: user.id,
+      tipo,
+      valor,
+      data,
+      categoria_id,
+      descricao,
+      recorrente: false,
+    })
+    if (error) return { erro: error.message }
+  }
 
   revalidatePath('/dashboard/transacoes')
   revalidatePath('/dashboard')
@@ -91,5 +118,25 @@ export async function deletarCategoria(id: string) {
   if (error) return { erro: error.message }
 
   revalidatePath('/dashboard/transacoes')
+  return { sucesso: true }
+}
+
+export async function cancelarRecorrencia(recorrenciaId: string, dataAtual: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { erro: 'Não autenticado' }
+
+  const { error } = await supabase
+    .from('transacoes')
+    .delete()
+    .eq('recorrencia_id', recorrenciaId)
+    .eq('user_id', user.id)
+    .gte('data', dataAtual)
+
+  if (error) return { erro: error.message }
+
+  revalidatePath('/dashboard/transacoes')
+  revalidatePath('/dashboard')
   return { sucesso: true }
 }
