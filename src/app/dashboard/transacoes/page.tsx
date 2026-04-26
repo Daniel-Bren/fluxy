@@ -1,14 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
 import NovaTransacaoModal from '@/components/transacoes/nova-transacao-modal'
 import ListaTransacoes from '@/components/transacoes/lista-transacoes'
+import SeletorMes from '@/components/seletor-mes'
+import { Suspense } from 'react'
 
-export default async function TransacoesPage() {
+type Props = {
+  searchParams: Promise<{ mes?: string }>
+}
+
+export default async function TransacoesPage({ searchParams }: Props) {
+  const { mes } = await searchParams
   const supabase = await createClient()
 
+  const ano = mes ? parseInt(mes.split('-')[0]) : new Date().getFullYear()
+  const mesNum = mes ? parseInt(mes.split('-')[1]) - 1 : new Date().getMonth()
+
+  const primeiroDia = `${ano}-${String(mesNum + 1).padStart(2, '0')}-01`
+  const ultimoDia = `${ano}-${String(mesNum + 1).padStart(2, '0')}-${new Date(ano, mesNum + 1, 0).getDate()}`
+
   const { data: categorias } = await supabase
-  .from('categorias')
-  .select('id, nome, user_id')
-  .order('nome')
+    .from('categorias')
+    .select('id, nome, user_id')
+    .order('nome')
 
   const { data: transacoes } = await supabase
     .from('transacoes')
@@ -22,11 +35,12 @@ export default async function TransacoesPage() {
         nome
       )
     `)
+    .gte('data', primeiroDia)
+    .lte('data', ultimoDia)
     .order('data', { ascending: false })
 
   return (
     <div className="p-8">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#111827]">Transações</h1>
@@ -35,10 +49,14 @@ export default async function TransacoesPage() {
           </p>
         </div>
 
-        <NovaTransacaoModal categorias={categorias ?? []} />
+        <div className="flex items-center gap-4">
+          <Suspense fallback={<div className="w-48 h-8 bg-gray-100 rounded-lg animate-pulse" />}>
+            <SeletorMes />
+          </Suspense>
+          <NovaTransacaoModal categorias={categorias ?? []} />
+        </div>
       </div>
 
-      {/* Lista */}
       <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
         <ListaTransacoes transacoes={(transacoes ?? []) as any} />
       </div>
