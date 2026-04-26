@@ -112,7 +112,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
         {transacoesRecentes && transacoesRecentes.length > 0 ? (
           <div className="space-y-3">
-            {transacoesRecentes.map((t: any) => (
+            {(transacoesRecentes as any[]).map((t) => (
               <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
