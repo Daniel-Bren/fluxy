@@ -26,15 +26,18 @@ export default async function DashboardLayout({
       <aside className="w-64 bg-[#0F172A] flex flex-col fixed h-full">
         <div className="px-6 py-6 border-b border-white/10">
           <span className="text-white text-xl font-bold tracking-tight">
-            💸 Fluxy
+             Fluxy
           </span>
         </div>
 
         <SidebarNav email={user.email ?? ''} />
 
         <div className="px-3 py-4 border-t border-white/10">
-          <div className="px-3 py-2 text-white/50 text-xs mb-2">
-            {user.email}
+          <div className="px-3 py-2 mb-2">
+            <p className="text-white/90 text-sm font-medium">
+              {user.user_metadata?.nome ?? user.email}
+            </p>
+            <p className="text-white/40 text-xs">{user.email}</p>
           </div>
           <form action={logout}>
             <button
