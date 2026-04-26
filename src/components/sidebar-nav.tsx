@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, ArrowLeftRight } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, History } from 'lucide-react'
 import { Suspense } from 'react'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Transações', href: '/dashboard/transacoes', icon: ArrowLeftRight },
+  { label: 'Histórico', href: '/dashboard/historico', icon: History },
 ]
 
 function SidebarNavInner() {
