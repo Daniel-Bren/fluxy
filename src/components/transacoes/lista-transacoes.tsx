@@ -11,7 +11,7 @@ type Transacao = {
   descricao: string | null
   categorias: {
     nome: string
-  } | null
+  }[] | null
 }
 
 type Props = {
@@ -48,10 +48,10 @@ export default function ListaTransacoes({ transacoes }: Props) {
 
             <div>
               <p className="text-sm font-medium text-[#111827]">
-                {t.descricao || t.categorias?.nome || '—'}
+                {t.descricao || t.categorias?.[0]?.nome || '—'}
               </p>
               <p className="text-xs text-[#6B7280]">
-                {t.categorias?.nome} •{' '}
+                {t.categorias?.[0]?.nome} •{' '}
                 {new Date(t.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
               </p>
             </div>
