@@ -22,9 +22,7 @@ Fluxy nasceu como projeto de estudo prático de desenvolvimento fullstack e banc
 |--------|------|-------|
 | V1 | MVP | Cadastro de transações, categorias fixas, resumo mensal |
 | V2 | Organização | Categorias customizadas, recorrências, dashboard com gráficos |
-| V3 | Inteligência | Alertas automáticos, comparativo mensal, insights de consumo |
-| V5 | Família | Contas compartilhadas, múltiplos perfis, visão consolidada |
-| V6 | Análise avançada | Score financeiro, relatórios, análise preditiva de padrões |
+| V3 | Grupo de usuários |
 
 ---
 
