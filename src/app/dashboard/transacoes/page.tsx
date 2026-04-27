@@ -3,21 +3,32 @@ import NovaTransacaoModal from '@/components/transacoes/nova-transacao-modal'
 import ListaTransacoes from '@/components/transacoes/lista-transacoes'
 import SeletorMes from '@/components/seletor-mes'
 import FiltrosTransacoes from '@/components/transacoes/filtros-transacoes'
+import ToggleModo from '@/components/toggle-modo'
 import { Suspense } from 'react'
 
 type Props = {
-  searchParams: Promise<{ mes?: string; tipo?: string; categoria_id?: string }>
+  searchParams: Promise<{ mes?: string; tipo?: string; categoria_id?: string; modo?: string }>
 }
 
 export default async function TransacoesPage({ searchParams }: Props) {
-  const { mes, tipo, categoria_id } = await searchParams
+  const { mes, tipo, categoria_id, modo } = await searchParams
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   const ano = mes ? parseInt(mes.split('-')[0]) : new Date().getFullYear()
   const mesNum = mes ? parseInt(mes.split('-')[1]) - 1 : new Date().getMonth()
 
   const primeiroDia = `${ano}-${String(mesNum + 1).padStart(2, '0')}-01`
   const ultimoDia = `${ano}-${String(mesNum + 1).padStart(2, '0')}-${new Date(ano, mesNum + 1, 0).getDate()}`
+
+  const { data: membro } = await supabase
+    .from('membros_grupo')
+    .select('grupo_id')
+    .eq('user_id', user!.id)
+    .single()
+
+  const grupoId = membro?.grupo_id
+  const modoCompartilhado = modo === 'compartilhado' && !!grupoId
 
   const { data: categorias } = await supabase
     .from('categorias')
@@ -42,6 +53,12 @@ export default async function TransacoesPage({ searchParams }: Props) {
     .lte('data', ultimoDia)
     .order('data', { ascending: false })
 
+  if (modoCompartilhado) {
+    query = query.eq('grupo_id', grupoId)
+  } else {
+    query = query.eq('user_id', user!.id).is('grupo_id', null)
+  }
+
   if (tipo && tipo !== 'todos') {
     query = query.eq('tipo', tipo)
   }
@@ -63,10 +80,15 @@ export default async function TransacoesPage({ searchParams }: Props) {
         </div>
 
         <div className="flex items-center gap-4">
+          {grupoId && (
+            <Suspense fallback={<div className="w-40 h-9 bg-gray-100 rounded-lg animate-pulse" />}>
+              <ToggleModo />
+            </Suspense>
+          )}
           <Suspense fallback={<div className="w-48 h-8 bg-gray-100 rounded-lg animate-pulse" />}>
             <SeletorMes />
           </Suspense>
-          <NovaTransacaoModal categorias={categorias ?? []} />
+          <NovaTransacaoModal categorias={categorias ?? []} grupoId={modoCompartilhado ? grupoId : null} />
         </div>
       </div>
 

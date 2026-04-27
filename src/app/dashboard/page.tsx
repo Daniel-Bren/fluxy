@@ -1,14 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import SeletorMes from '@/components/seletor-mes'
 import GraficoCategorias from '@/components/grafico-categorias'
+import ToggleModo from '@/components/toggle-modo'
 import { Suspense } from 'react'
 
 type Props = {
-  searchParams: Promise<{ mes?: string }>
+  searchParams: Promise<{ mes?: string; modo?: string }>
 }
 
 export default async function DashboardPage({ searchParams }: Props) {
-  const { mes } = await searchParams
+  const { mes, modo } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -21,40 +22,51 @@ export default async function DashboardPage({ searchParams }: Props) {
   const primeiroDia = `${ano}-${String(mesNum + 1).padStart(2, '0')}-01`
   const ultimoDia = `${ano}-${String(mesNum + 1).padStart(2, '0')}-${new Date(ano, mesNum + 1, 0).getDate()}`
 
-  const { data: transacoes } = await supabase
+  // Busca grupo do usuário
+  const { data: membro } = await supabase
+    .from('membros_grupo')
+    .select('grupo_id')
+    .eq('user_id', user!.id)
+    .single()
+
+  const grupoId = membro?.grupo_id
+  const modoCompartilhado = modo === 'compartilhado' && !!grupoId
+
+  // Query base
+  let queryTransacoes = supabase
     .from('transacoes')
     .select('tipo, valor')
     .gte('data', primeiroDia)
     .lte('data', ultimoDia)
 
-  const { data: transacoesRecentes } = await supabase
+  let queryRecentes = supabase
     .from('transacoes')
-    .select(`
-      id,
-      tipo,
-      valor,
-      data,
-      descricao,
-      categorias (
-        nome
-      )
-    `)
+    .select('id, tipo, valor, data, descricao, categorias(nome)')
     .gte('data', primeiroDia)
     .lte('data', ultimoDia)
     .order('data', { ascending: false })
     .limit(5)
 
-  const { data: gastosPorCategoria } = await supabase
+  let queryGastos = supabase
     .from('transacoes')
-    .select(`
-      valor,
-      categorias (
-        nome
-      )
-    `)
+    .select('valor, categorias(nome)')
     .eq('tipo', 'saida')
     .gte('data', primeiroDia)
     .lte('data', ultimoDia)
+
+  if (modoCompartilhado) {
+    queryTransacoes = queryTransacoes.eq('grupo_id', grupoId)
+    queryRecentes = queryRecentes.eq('grupo_id', grupoId)
+    queryGastos = queryGastos.eq('grupo_id', grupoId)
+  } else {
+    queryTransacoes = queryTransacoes.eq('user_id', user!.id).is('grupo_id', null)
+    queryRecentes = queryRecentes.eq('user_id', user!.id).is('grupo_id', null)
+    queryGastos = queryGastos.eq('user_id', user!.id).is('grupo_id', null)
+  }
+
+  const { data: transacoes } = await queryTransacoes
+  const { data: transacoesRecentes } = await queryRecentes
+  const { data: gastosPorCategoria } = await queryGastos
 
   const totalEntradas = transacoes
     ?.filter((t) => t.tipo === 'entrada')
@@ -65,15 +77,13 @@ export default async function DashboardPage({ searchParams }: Props) {
     .reduce((acc, t) => acc + Number(t.valor), 0) ?? 0
 
   const saldo = totalEntradas - totalSaidas
-
   const mesAtual = dataRef.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
 
-  // Agrupa gastos por categoria
   const categoriaMap: Record<string, number> = {}
   for (const t of gastosPorCategoria ?? []) {
-  const cat = t.categorias as any
-  const nome = (Array.isArray(cat) ? cat[0]?.nome : cat?.nome) ?? 'Outros'
-  categoriaMap[nome] = (categoriaMap[nome] ?? 0) + Number(t.valor)
+    const cat = t.categorias as any
+    const nome = (Array.isArray(cat) ? cat[0]?.nome : cat?.nome) ?? 'Outros'
+    categoriaMap[nome] = (categoriaMap[nome] ?? 0) + Number(t.valor)
   }
   const dadosGrafico = Object.entries(categoriaMap)
     .map(([nome, valor]) => ({ nome, valor }))
@@ -95,9 +105,16 @@ export default async function DashboardPage({ searchParams }: Props) {
           </p>
         </div>
 
-        <Suspense fallback={<div className="w-48 h-8 bg-gray-100 rounded-lg animate-pulse" />}>
-          <SeletorMes />
-        </Suspense>
+        <div className="flex items-center gap-3">
+          {grupoId && (
+            <Suspense fallback={<div className="w-40 h-9 bg-gray-100 rounded-lg animate-pulse" />}>
+              <ToggleModo />
+            </Suspense>
+          )}
+          <Suspense fallback={<div className="w-48 h-8 bg-gray-100 rounded-lg animate-pulse" />}>
+            <SeletorMes />
+          </Suspense>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6 mb-8">
@@ -126,7 +143,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <h2 className="text-lg font-semibold text-[#111827] mb-4">Gastos por categoria</h2>
           <GraficoCategorias dados={dadosGrafico} />

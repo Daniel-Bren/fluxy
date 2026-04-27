@@ -1,16 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const convite = searchParams.get('convite')
+
   const supabase = createClient()
 
   const [email, setEmail] = useState('')
@@ -33,7 +37,11 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/dashboard')
+    if (convite) {
+      router.push(`/convite/${convite}`)
+    } else {
+      router.push('/dashboard')
+    }
     router.refresh()
   }
 
@@ -41,9 +49,13 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-[#111827]">Entrar no Fluxy</CardTitle>
+          <CardTitle className="text-2xl text-[#111827]">
+            {convite ? 'Entre para acessar o grupo' : 'Entrar no Fluxy'}
+          </CardTitle>
           <CardDescription className="text-[#6B7280]">
-            Digite seu email e senha para continuar
+            {convite
+              ? 'Faça login e entre automaticamente no grupo compartilhado.'
+              : 'Digite seu email e senha para continuar'}
           </CardDescription>
         </CardHeader>
 
@@ -84,12 +96,20 @@ export default function LoginPage() {
 
           <p className="text-sm text-[#6B7280]">
             Não tem conta?{' '}
-            <Link href="/cadastro" className="text-[#2563EB] hover:underline">
+            <Link href={convite ? `/cadastro?convite=${convite}` : '/cadastro'} className="text-[#2563EB] hover:underline">
               Cadastre-se
             </Link>
           </p>
         </CardFooter>
       </Card>
     </main>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

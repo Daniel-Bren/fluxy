@@ -1,17 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useSearchParams } from 'next/navigation'
+import { cadastrarUsuario } from './actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
-export default function CadastroPage() {
-  const router = useRouter()
-  const supabase = createClient()
+function CadastroForm() {
+  const searchParams = useSearchParams()
+  const convite = searchParams.get('convite')
 
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
@@ -34,31 +35,30 @@ export default function CadastroPage() {
 
     setCarregando(true)
 
-    const { error } = await supabase.auth.signUp({
+    const resultado = await cadastrarUsuario({
+      nome,
       email,
-      password: senha,
-      options: {
-        data: { nome },
-      },
+      senha,
+      convite,
     })
 
-    if (error) {
-      setErro('Não foi possível criar a conta. Tente novamente.')
+    if (resultado?.erro) {
+      setErro(resultado.erro)
       setCarregando(false)
-      return
     }
-
-    router.push('/dashboard')
-    router.refresh()
   }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-[#111827]">Criar conta no Fluxy</CardTitle>
+          <CardTitle className="text-2xl text-[#111827]">
+            {convite ? 'Criar conta para entrar no grupo' : 'Criar conta no Fluxy'}
+          </CardTitle>
           <CardDescription className="text-[#6B7280]">
-            Comece a organizar suas finanças agora
+            {convite
+              ? 'Crie sua conta e entre automaticamente no grupo compartilhado.'
+              : 'Comece a organizar suas finanças agora'}
           </CardDescription>
         </CardHeader>
 
@@ -110,12 +110,20 @@ export default function CadastroPage() {
 
           <p className="text-sm text-[#6B7280]">
             Já tem conta?{' '}
-            <Link href="/login" className="text-[#2563EB] hover:underline">
+            <Link href={convite ? `/login?convite=${convite}` : '/login'} className="text-[#2563EB] hover:underline">
               Entrar
             </Link>
           </p>
         </CardFooter>
       </Card>
     </main>
+  )
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense>
+      <CadastroForm />
+    </Suspense>
   )
 }

@@ -25,9 +25,12 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen">
       <aside className="w-64 bg-[#0F172A] flex flex-col fixed h-full">
         <div className="px-6 py-6 border-b border-white/10">
-          <span className="text-white text-xl font-bold tracking-tight">
-             Fluxy
-          </span>
+          <div className="flex items-center gap-3">
+            <img src="/favicon.ico" alt="Fluxy" className="h-6 w-6" />
+            <span className="text-white text-xl font-bold tracking-tight">
+              Fluxy
+            </span>
+          </div>
         </div>
 
         <SidebarNav email={user.email ?? ''} />

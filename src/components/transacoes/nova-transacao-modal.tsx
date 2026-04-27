@@ -15,9 +15,10 @@ type Categoria = {
 
 type Props = {
   categorias: Categoria[]
+  grupoId?: string | null
 }
 
-export default function NovaTransacaoModal({ categorias: categoriasProp }: Props) {
+export default function NovaTransacaoModal({ categorias: categoriasProp, grupoId }: Props) {
   const [aberto, setAberto] = useState(false)
   const [tipo, setTipo] = useState<'entrada' | 'saida'>('entrada')
   const [erro, setErro] = useState('')
@@ -39,7 +40,7 @@ export default function NovaTransacaoModal({ categorias: categoriasProp }: Props
   async function handleSubmit(formData: FormData) {
     setErro('')
     setCarregando(true)
-    formData.set('tipo', tipo)
+    if (grupoId) formData.set('grupo_id', grupoId)
 
     const resultado = await criarTransacao(formData)
 
