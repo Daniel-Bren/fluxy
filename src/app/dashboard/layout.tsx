@@ -1,12 +1,7 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { logout } from './actions'
-import {
-  LayoutDashboard,
-  ArrowLeftRight,
-  LogOut,
-} from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import SidebarNav from '@/components/sidebar-nav'
 
 export default async function DashboardLayout({
@@ -24,23 +19,29 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen">
       <aside className="w-64 bg-[#0F172A] flex flex-col fixed h-full">
+
+        {/* Logo */}
         <div className="px-6 py-6 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <img src="/favicon.ico" alt="Fluxy" className="h-6 w-6" />
-            <span className="text-white text-xl font-bold tracking-tight">
-              Fluxy
-            </span>
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/android-chrome-192x192.png"
+              alt="Fluxy"
+              className="w-7 h-7 rounded-lg"
+            />
+            <span className="text-white text-xl font-bold tracking-tight">Fluxy</span>
           </div>
         </div>
 
-        <SidebarNav email={user.email ?? ''} />
+        {/* Navegação */}
+        <SidebarNav email={user!.email ?? ''} />
 
+        {/* Usuário + Logout */}
         <div className="px-3 py-4 border-t border-white/10">
           <div className="px-3 py-2 mb-2">
             <p className="text-white/90 text-sm font-medium">
-              {user.user_metadata?.nome ?? user.email}
+              {user!.user_metadata?.nome ?? user!.email}
             </p>
-            <p className="text-white/40 text-xs">{user.email}</p>
+            <p className="text-white/40 text-xs">{user!.email}</p>
           </div>
           <form action={logout}>
             <button
