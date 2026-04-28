@@ -65,7 +65,7 @@ export default function GraficoCategorias({ dados }: Props) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(valor: number) => formatarMoeda(valor)}
+            formatter={(valor) => formatarMoeda(Number(valor))}
           />
         </PieChart>
       </ResponsiveContainer>
