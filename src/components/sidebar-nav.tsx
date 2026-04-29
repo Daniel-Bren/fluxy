@@ -17,11 +17,15 @@ function SidebarNavInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const mes = searchParams.get('mes')
+  const modo = searchParams.get('modo')
 
   return (
     <nav className="flex-1 px-3 py-4 space-y-1">
       {navItems.map((item) => {
-        const href = mes ? `${item.href}?mes=${mes}` : item.href
+        const params = new URLSearchParams()
+        if (mes) params.set('mes', mes)
+        if (modo) params.set('modo', modo)
+        const href = params.toString() ? `${item.href}?${params.toString()}` : item.href ?? '/'
         const ativo = pathname === item.href
         const Icon = item.icon
 
