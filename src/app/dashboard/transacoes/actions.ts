@@ -19,7 +19,7 @@ export async function criarTransacao(formData: FormData) {
   const grupo_id = formData.get('grupo_id') as string | null
 
   if (!tipo || !valor || !data || !categoria_id) {
-    return { erro: 'Preencha todos os campos obrigatórios.' }
+  return { erro: 'Preencha todos os campos obrigatórios.' }
   }
 
   if (recorrente) {

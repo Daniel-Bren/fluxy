@@ -40,6 +40,7 @@ export default function NovaTransacaoModal({ categorias: categoriasProp, grupoId
   async function handleSubmit(formData: FormData) {
     setErro('')
     setCarregando(true)
+    formData.set('tipo', tipo)
     if (grupoId) formData.set('grupo_id', grupoId)
 
     const resultado = await criarTransacao(formData)
