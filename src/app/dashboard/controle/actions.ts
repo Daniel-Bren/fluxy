@@ -68,11 +68,12 @@ export async function editarConta(id: string, formData: FormData) {
   if (!user) return { erro: 'Não autenticado' }
 
   const valor = Number(formData.get('valor'))
+  const vencimento = String(formData.get('vencimento') ?? '')
   const categoriaId = String(formData.get('categoria_id') ?? '')
   const descricao = String(formData.get('descricao') ?? '').trim()
 
-  if (!valor || valor <= 0 || !categoriaId || !descricao) {
-    return { erro: 'Preencha descrição, valor e categoria.' }
+  if (!valor || valor <= 0 || !vencimento || !categoriaId || !descricao) {
+    return { erro: 'Preencha descrição, vencimento, valor e categoria.' }
   }
 
   const { error } = await supabase.rpc('editar_conta_a_pagar', {
@@ -80,6 +81,7 @@ export async function editarConta(id: string, formData: FormData) {
     p_categoria_id: categoriaId,
     p_descricao: descricao,
     p_valor: valor,
+    p_vencimento: vencimento,
   })
 
   if (error) return { erro: error.message }
