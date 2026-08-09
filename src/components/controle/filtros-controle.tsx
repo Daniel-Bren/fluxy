@@ -38,14 +38,14 @@ export default function FiltrosControle({ categorias }: Props) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <div className="flex overflow-hidden rounded-lg border border-gray-200 text-sm">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="grid grid-cols-4 overflow-hidden rounded-lg border border-gray-200 text-sm">
         {estados.map((estado) => (
           <button
             key={estado.valor}
             type="button"
             onClick={() => atualizar('status', estado.valor)}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`min-w-0 px-2 py-2 transition-colors sm:px-3 sm:py-1.5 ${
               statusAtual === estado.valor
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-500 hover:bg-gray-50'
@@ -59,7 +59,7 @@ export default function FiltrosControle({ categorias }: Props) {
       <select
         value={categoriaAtual}
         onChange={(event) => atualizar('categoria_id', event.target.value)}
-        className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-500 outline-none focus:ring-2 focus:ring-blue-600"
+        className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-gray-500 outline-none focus:ring-2 focus:ring-blue-600 sm:h-auto sm:w-auto sm:text-sm"
       >
         <option value="">Todas as categorias</option>
         {categorias.map((categoria) => (

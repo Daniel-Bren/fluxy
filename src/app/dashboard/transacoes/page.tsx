@@ -71,7 +71,7 @@ export default async function TransacoesPage({ searchParams }: Props) {
   const { data: transacoes } = await query
 
   return (
-    <div className="space-y-5 p-8">
+    <div className="space-y-5 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-950">Transações</h1>
@@ -80,7 +80,7 @@ export default async function TransacoesPage({ searchParams }: Props) {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
           {grupoId && (
             <Suspense fallback={<div className="w-40 h-9 bg-gray-100 rounded-lg animate-pulse" />}>
               <ToggleModo />
@@ -102,7 +102,7 @@ export default async function TransacoesPage({ searchParams }: Props) {
         </Suspense>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5">
         <ListaTransacoes transacoes={(transacoes ?? []) as TransacaoLista[]} />
       </div>
     </div>

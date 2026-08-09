@@ -30,9 +30,9 @@ export default function FiltrosTransacoes({ categorias }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       {/* Filtro de tipo */}
-      <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm">
+      <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-gray-200 text-sm">
         {[
           { label: 'Todos', valor: 'todos' },
           { label: 'Entradas', valor: 'entrada' },
@@ -41,7 +41,7 @@ export default function FiltrosTransacoes({ categorias }: Props) {
           <button
             key={op.valor}
             onClick={() => atualizar('tipo', op.valor)}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`px-3 py-2 transition-colors sm:py-1.5 ${
               tipoAtual === op.valor
                 ? 'bg-[#2563EB] text-white'
                 : 'text-[#6B7280] hover:bg-gray-50'
@@ -56,7 +56,7 @@ export default function FiltrosTransacoes({ categorias }: Props) {
       <select
         value={categoriaAtual}
         onChange={(e) => atualizar('categoria_id', e.target.value)}
-        className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-[#6B7280] bg-white focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+        className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#2563EB] sm:h-auto sm:w-auto sm:text-sm"
       >
         <option value="">Todas as categorias</option>
         {categorias.map((cat) => (

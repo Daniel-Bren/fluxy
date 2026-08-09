@@ -8,6 +8,17 @@ type Props = {
   searchParams: Promise<{ mes?: string; modo?: string }>
 }
 
+type CategoriaRelacionada = { nome: string } | { nome: string }[] | null
+
+type TransacaoRecente = {
+  id: string
+  tipo: 'entrada' | 'saida'
+  valor: number | string
+  data: string
+  descricao: string | null
+  categorias: CategoriaRelacionada
+}
+
 export default async function DashboardPage({ searchParams }: Props) {
   const { mes, modo } = await searchParams
   const supabase = await createClient()
@@ -81,7 +92,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   const categoriaMap: Record<string, number> = {}
   for (const t of gastosPorCategoria ?? []) {
-    const cat = t.categorias as any
+    const cat = t.categorias as CategoriaRelacionada
     const nome = (Array.isArray(cat) ? cat[0]?.nome : cat?.nome) ?? 'Outros'
     categoriaMap[nome] = (categoriaMap[nome] ?? 0) + Number(t.valor)
   }
@@ -94,8 +105,8 @@ export default async function DashboardPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col gap-4 sm:mb-8 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#111827]">
             Olá, {primeiroNome}! 👋
@@ -105,7 +116,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           {grupoId && (
             <Suspense fallback={<div className="w-40 h-9 bg-gray-100 rounded-lg animate-pulse" />}>
               <ToggleModo />
@@ -117,39 +128,39 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mb-8 lg:grid-cols-3 lg:gap-6">
+        <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
           <p className="text-sm text-[#6B7280] mb-1">Saldo atual</p>
-          <p className={`text-3xl font-bold ${saldo >= 0 ? 'text-[#111827]' : 'text-[#DC2626]'}`}>
+          <p className={`break-words text-2xl font-bold sm:text-3xl ${saldo >= 0 ? 'text-[#111827]' : 'text-[#DC2626]'}`}>
             {formatarMoeda(saldo)}
           </p>
           <p className="text-xs text-[#6B7280] mt-2 capitalize">em {mesAtual}</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
           <p className="text-sm text-[#6B7280] mb-1">Total recebido</p>
-          <p className="text-3xl font-bold text-[#16A34A]">
+          <p className="break-words text-2xl font-bold text-[#16A34A] sm:text-3xl">
             {formatarMoeda(totalEntradas)}
           </p>
           <p className="text-xs text-[#6B7280] mt-2 capitalize">em {mesAtual}</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm sm:col-span-2 sm:p-5 lg:col-span-1 lg:p-6">
           <p className="text-sm text-[#6B7280] mb-1">Total gasto</p>
-          <p className="text-3xl font-bold text-[#DC2626]">
+          <p className="break-words text-2xl font-bold text-[#DC2626] sm:text-3xl">
             {formatarMoeda(totalSaidas)}
           </p>
           <p className="text-xs text-[#6B7280] mt-2 capitalize">em {mesAtual}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
+        <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
           <h2 className="text-lg font-semibold text-[#111827] mb-4">Gastos por categoria</h2>
           <GraficoCategorias dados={dadosGrafico} />
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-[#111827]">Transações recentes</h2>
             <a href="/dashboard/transacoes" className="text-sm text-[#2563EB] hover:underline">
@@ -159,9 +170,12 @@ export default async function DashboardPage({ searchParams }: Props) {
 
           {transacoesRecentes && transacoesRecentes.length > 0 ? (
             <div className="space-y-3">
-              {(transacoesRecentes as any[]).map((t) => (
-                <div key={t.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
-                  <div className="flex items-center gap-3">
+              {(transacoesRecentes as unknown as TransacaoRecente[]).map((t) => {
+                const categoria = Array.isArray(t.categorias) ? t.categorias[0] : t.categorias
+
+                return (
+                <div key={t.id} className="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-gray-50 p-3">
+                  <div className="flex min-w-0 items-center gap-3">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                       t.tipo === 'entrada' ? 'bg-green-50' : 'bg-red-50'
                     }`}>
@@ -171,23 +185,24 @@ export default async function DashboardPage({ searchParams }: Props) {
                         {t.tipo === 'entrada' ? '↓' : '↑'}
                       </span>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-[#111827]">
-                        {t.descricao || t.categorias?.[0]?.nome || '—'}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[#111827]">
+                        {t.descricao || categoria?.nome || '—'}
                       </p>
                       <p className="text-xs text-[#6B7280]">
                         {new Date(t.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                       </p>
                     </div>
                   </div>
-                  <span className={`text-sm font-semibold ${
+                  <span className={`shrink-0 text-sm font-semibold ${
                     t.tipo === 'entrada' ? 'text-[#16A34A]' : 'text-[#DC2626]'
                   }`}>
                     {t.tipo === 'saida' ? '- ' : ''}
                     {Number(t.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </span>
                 </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="text-center py-8 text-[#6B7280] text-sm">

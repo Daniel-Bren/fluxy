@@ -42,7 +42,7 @@ export default function GrupoClient({ grupoId }: Props) {
       </Button>
 
       {link && (
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-[#6B7280] truncate">
             {link}
           </div>

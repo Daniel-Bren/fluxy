@@ -85,7 +85,7 @@ export default async function ControlePage({ searchParams }: Props) {
   const { data: contas } = await query
 
   return (
-    <div className="space-y-5 p-8">
+    <div className="space-y-5 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-950">Controle</h1>
@@ -94,7 +94,7 @@ export default async function ControlePage({ searchParams }: Props) {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
           {grupoId && (
             <Suspense fallback={<div className="h-9 w-40 animate-pulse rounded-lg bg-gray-100" />}>
               <ToggleModo />

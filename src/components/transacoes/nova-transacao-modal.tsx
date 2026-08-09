@@ -94,13 +94,13 @@ export default function NovaTransacaoModal({ categorias: categoriasProp, grupoId
       </Button>
 
       {aberto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setAberto(false)}
           />
 
-          <div className="relative bg-white rounded-2xl p-6 w-full max-w-md shadow-xl z-10 max-h-[90vh] overflow-y-auto">
+          <div className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-lg bg-white p-4 shadow-xl sm:max-h-[90vh] sm:p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-[#111827]">
                 Nova Transação

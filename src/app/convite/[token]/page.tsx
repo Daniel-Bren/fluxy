@@ -20,8 +20,8 @@ export default async function ConvitePage({ params }: Props) {
 
   if (!convite) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
-        <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm max-w-md w-full text-center">
+      <main className="flex min-h-dvh items-center justify-center bg-[#F9FAFB] p-4 sm:p-6">
+        <div className="w-full max-w-md rounded-lg border border-gray-100 bg-white p-6 text-center shadow-sm sm:p-8">
           <p className="text-xl font-bold text-[#111827] mb-2">Link inválido</p>
           <p className="text-[#6B7280] text-sm">Este link de convite não existe ou expirou.</p>
         </div>
@@ -31,8 +31,8 @@ export default async function ConvitePage({ params }: Props) {
 
   if (convite.usado) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
-        <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm max-w-md w-full text-center">
+      <main className="flex min-h-dvh items-center justify-center bg-[#F9FAFB] p-4 sm:p-6">
+        <div className="w-full max-w-md rounded-lg border border-gray-100 bg-white p-6 text-center shadow-sm sm:p-8">
           <p className="text-xl font-bold text-[#111827] mb-2">Convite já utilizado</p>
           <p className="text-[#6B7280] text-sm">Este link já foi usado. Peça um novo convite ao dono do grupo.</p>
         </div>

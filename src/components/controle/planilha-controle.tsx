@@ -237,10 +237,11 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
           <Button
             type="submit"
             disabled={isPending}
-            className="h-10 rounded-md bg-gray-950 px-0 hover:bg-gray-800"
+            className="h-10 rounded-md bg-gray-950 hover:bg-gray-800 lg:px-0"
             title="Adicionar conta"
           >
             {isPending ? <Check size={17} /> : <Plus size={17} />}
+            <span className="lg:sr-only">Adicionar conta</span>
           </Button>
         </div>
 
@@ -265,7 +266,122 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-gray-100 md:hidden">
+          {contas.length === 0 ? (
+            <p className="px-4 py-10 text-center text-sm text-gray-500">
+              Nenhuma conta neste mês. Use o formulário acima para adicionar a primeira.
+            </p>
+          ) : (
+            contas.map((conta) => {
+              const vencida = conta.status === 'pendente' && conta.vencimento < hojeIso()
+
+              return (
+                <article key={conta.id} className="space-y-3 p-4">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <h3 className="break-words text-sm font-semibold text-gray-950">
+                          {conta.descricao}
+                        </h3>
+                        {conta.recorrente && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700">
+                            <RefreshCw size={12} />
+                            Recorrente
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500">{nomeCategoria(conta.categorias)}</p>
+                    </div>
+                    <p className="shrink-0 text-sm font-semibold text-gray-950">
+                      {formatarMoeda(Number(conta.valor))}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className={`text-xs font-medium ${vencida ? 'text-rose-700' : 'text-gray-600'}`}>
+                      Vence em {formatarData(conta.vencimento)}
+                    </p>
+                    {conta.status === 'paga' ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+                        <CheckCircle2 size={13} />
+                        Paga em {formatarData(conta.paga_em!)}
+                      </span>
+                    ) : vencida ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700">
+                        <AlertTriangle size={13} />
+                        Vencida
+                      </span>
+                    ) : (
+                      <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
+                        Pendente
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end gap-1 border-t border-gray-100 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => abrirEdicao(conta)}
+                      disabled={isPending}
+                      className="flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:bg-blue-50 hover:text-blue-700"
+                      title="Editar conta"
+                    >
+                      <Pencil size={16} />
+                    </button>
+
+                    {conta.status === 'pendente' ? (
+                      <button
+                        type="button"
+                        onClick={() => abrirPagamento(conta)}
+                        disabled={isPending}
+                        className="flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:bg-emerald-50 hover:text-emerald-700"
+                        title="Marcar como paga"
+                      >
+                        <CheckCircle2 size={17} />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleDesfazerPagamento(conta.id)}
+                        disabled={isPending}
+                        className="flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:bg-amber-50 hover:text-amber-700"
+                        title="Desfazer pagamento"
+                      >
+                        <RotateCcw size={17} />
+                      </button>
+                    )}
+
+                    {conta.status === 'pendente' && conta.recorrente && conta.recorrencia_id && (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelarRecorrencia(conta.recorrencia_id!, conta.vencimento)}
+                        disabled={isPending}
+                        className="flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:bg-sky-50 hover:text-sky-700"
+                        title="Cancelar recorrência"
+                      >
+                        <RefreshCw size={16} />
+                      </button>
+                    )}
+
+                    {conta.status === 'pendente' && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeletar(conta.id)}
+                        disabled={isPending}
+                        className="flex h-10 w-10 items-center justify-center rounded-md text-gray-500 hover:bg-rose-50 hover:text-rose-700"
+                        title="Excluir conta"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                </article>
+              )
+            })
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[880px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
@@ -394,7 +510,7 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
       </form>
 
       {contaEdicao && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
           <button
             type="button"
             aria-label="Fechar edição"
@@ -403,7 +519,7 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
           />
           <form
             action={salvarEdicao}
-            className="relative z-10 w-full max-w-md rounded-lg bg-white p-5 shadow-xl"
+            className="relative z-10 max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-lg bg-white p-4 shadow-xl sm:p-5"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -493,7 +609,7 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
               )}
             </div>
 
-            <div className="mt-5 flex justify-end gap-2">
+            <div className="mt-5 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
               <Button type="button" variant="outline" onClick={() => setContaEdicao(null)}>
                 Cancelar
               </Button>
@@ -507,14 +623,14 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
       )}
 
       {contaPagamento && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4">
           <button
             type="button"
             aria-label="Fechar confirmação"
             className="absolute inset-0 bg-black/45"
             onClick={() => setContaPagamento(null)}
           />
-          <div className="relative z-10 w-full max-w-sm rounded-lg bg-white p-5 shadow-xl">
+          <div className="relative z-10 w-full max-w-sm rounded-lg bg-white p-4 shadow-xl sm:p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold text-gray-950">Marcar como paga</h2>
@@ -541,7 +657,7 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
               className="mt-2 h-10 rounded-md"
             />
 
-            <div className="mt-5 flex justify-end gap-2">
+            <div className="mt-5 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
               <Button type="button" variant="outline" onClick={() => setContaPagamento(null)}>
                 Cancelar
               </Button>

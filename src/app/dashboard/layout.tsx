@@ -18,8 +18,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-64 bg-[#0F172A] flex flex-col fixed h-full">
+    <div className="min-h-dvh bg-[#F9FAFB]">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col bg-[#0F172A] lg:flex">
 
         {/* Logo */}
         <div className="px-6 py-6 border-b border-white/10">
@@ -58,9 +58,35 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      <main className="ml-64 min-h-screen min-w-0 flex-1 bg-[#F9FAFB]">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-[#0F172A] px-4 lg:hidden">
+        <div className="flex items-center gap-2.5">
+          <Image
+            src="/android-chrome-192x192.png"
+            alt="Fluxy"
+            width={28}
+            height={28}
+            className="h-7 w-7 rounded-lg"
+          />
+          <span className="text-lg font-bold text-white">Fluxy</span>
+        </div>
+        <form action={logout}>
+          <button
+            type="submit"
+            aria-label="Sair"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-white/70 hover:bg-white/10 hover:text-white"
+          >
+            <LogOut size={19} />
+          </button>
+        </form>
+      </header>
+
+      <main className="min-h-dvh min-w-0 bg-[#F9FAFB] pb-[calc(5rem+env(safe-area-inset-bottom))] lg:ml-64 lg:pb-0">
         {children}
       </main>
+
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#0F172A] pb-[env(safe-area-inset-bottom)] lg:hidden">
+        <SidebarNav variant="mobile" />
+      </div>
     </div>
   )
 }

@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Suspense } from 'react'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const convite = searchParams.get('convite')
+  const senhaAlterada = searchParams.get('senha') === 'alterada'
   const supabase = createClient()
 
   const [email, setEmail] = useState('')
@@ -41,7 +43,7 @@ function LoginForm() {
   }
 
   return (
-    <main className="min-h-screen flex bg-[#080C14]">
+    <main className="flex min-h-dvh bg-[#080C14]">
       {/* Lado esquerdo — visual */}
       <div className="hidden lg:flex flex-1 flex-col items-center justify-center relative overflow-hidden">
         {/* Fundo com gradiente */}
@@ -63,7 +65,7 @@ function LoginForm() {
         {/* Conteúdo */}
         <div className="relative z-10 text-center px-12">
           <div className="flex items-center justify-center gap-3 mb-12">
-            <img src="/android-chrome-192x192.png" alt="Fluxy" className="w-14 h-14 rounded-2xl shadow-2xl shadow-blue-500/30" />
+            <Image src="/android-chrome-192x192.png" alt="Fluxy" width={56} height={56} className="h-14 w-14 rounded-2xl shadow-2xl shadow-blue-500/30" />
             <span className="text-white text-4xl font-bold tracking-tight">Fluxy</span>
           </div>
 
@@ -99,14 +101,14 @@ function LoginForm() {
       </div>
 
       {/* Lado direito — formulário */}
-      <div className="w-full lg:w-[480px] flex flex-col items-center justify-center px-8 relative">
+      <div className="relative flex w-full flex-col items-center justify-center px-4 py-8 sm:px-8 lg:w-[480px]">
         {/* Borda sutil à esquerda */}
         <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />
 
         <div className="w-full max-w-sm">
           {/* Logo mobile */}
-          <div className="flex lg:hidden items-center gap-2 mb-10">
-            <img src="/android-chrome-192x192.png" alt="Fluxy" className="w-8 h-8 rounded-xl" />
+          <div className="mb-8 flex items-center gap-2 lg:hidden">
+            <Image src="/android-chrome-192x192.png" alt="Fluxy" width={32} height={32} className="h-8 w-8 rounded-lg" />
             <span className="text-white text-xl font-bold">Fluxy</span>
           </div>
 
@@ -133,7 +135,15 @@ function LoginForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-white/60 text-sm font-medium">Senha</label>
+              <div className="flex items-center justify-between gap-3">
+                <label className="text-sm font-medium text-white/60">Senha</label>
+                <Link
+                  href="/recuperar-senha"
+                  className="text-sm font-medium text-blue-400 transition-colors hover:text-blue-300"
+                >
+                  Esqueci minha senha
+                </Link>
+              </div>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -147,6 +157,12 @@ function LoginForm() {
             {erro && (
               <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
                 {erro}
+              </p>
+            )}
+
+            {senhaAlterada && !erro && (
+              <p className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+                Senha alterada com sucesso. Entre novamente.
               </p>
             )}
 

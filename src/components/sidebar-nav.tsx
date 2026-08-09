@@ -14,14 +14,23 @@ const navItems = [
   { label: 'Grupo', href: '/dashboard/grupo', icon: Users },
 ]
 
-function SidebarNavInner() {
+type SidebarNavProps = {
+  variant?: 'sidebar' | 'mobile'
+}
+
+function SidebarNavInner({ variant = 'sidebar' }: SidebarNavProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const mes = searchParams.get('mes')
   const modo = searchParams.get('modo')
 
   return (
-    <nav className="flex-1 px-3 py-4 space-y-1">
+    <nav
+      aria-label={variant === 'mobile' ? 'Navegação principal móvel' : 'Navegação principal'}
+      className={variant === 'mobile'
+        ? 'grid h-16 grid-cols-5 px-1'
+        : 'flex-1 space-y-1 px-3 py-4'}
+    >
       {navItems.map((item) => {
         const params = new URLSearchParams()
         if (mes) params.set('mes', mes)
@@ -34,14 +43,18 @@ function SidebarNavInner() {
           <Link
             key={item.href}
             href={href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ${
-              ativo
-                ? 'bg-white/15 text-white'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
+            className={variant === 'mobile'
+              ? `flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-[10px] font-medium transition-colors ${
+                  ativo ? 'text-blue-300' : 'text-white/60 hover:text-white'
+                }`
+              : `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  ativo
+                    ? 'bg-white/15 text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`}
           >
-            <Icon size={18} />
-            {item.label}
+            <Icon size={variant === 'mobile' ? 20 : 18} />
+            <span className="max-w-full truncate">{item.label}</span>
           </Link>
         )
       })}
@@ -49,16 +62,16 @@ function SidebarNavInner() {
   )
 }
 
-export default function SidebarNav() {
+export default function SidebarNav({ variant = 'sidebar' }: SidebarNavProps) {
   return (
     <Suspense fallback={
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className={variant === 'mobile' ? 'grid h-16 grid-cols-5 px-1' : 'flex-1 space-y-1 px-3 py-4'}>
         {navItems.map((item) => (
-          <div key={item.href} className="h-10 rounded-lg bg-white/5 animate-pulse" />
+          <div key={item.href} className={variant === 'mobile' ? 'm-2 rounded-lg bg-white/5 animate-pulse' : 'h-10 rounded-lg bg-white/5 animate-pulse'} />
         ))}
       </nav>
     }>
-      <SidebarNavInner />
+      <SidebarNavInner variant={variant} />
     </Suspense>
   )
 }

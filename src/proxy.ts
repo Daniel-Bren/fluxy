@@ -29,15 +29,23 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
-  request.nextUrl.pathname.startsWith('/cadastro') ||
-  request.nextUrl.pathname.startsWith('/convite')
+  const isPublicAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
+    request.nextUrl.pathname.startsWith('/cadastro') ||
+    request.nextUrl.pathname.startsWith('/convite') ||
+    request.nextUrl.pathname.startsWith('/recuperar-senha') ||
+    request.nextUrl.pathname.startsWith('/redefinir-senha') ||
+    request.nextUrl.pathname.startsWith('/auth/callback')
 
-  if (!user && !isAuthPage) {
+  if (!user && !isPublicAuthRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (user && isAuthPage) {
+  const redirectAuthenticated = request.nextUrl.pathname.startsWith('/login') ||
+    request.nextUrl.pathname.startsWith('/cadastro') ||
+    request.nextUrl.pathname.startsWith('/convite') ||
+    request.nextUrl.pathname.startsWith('/recuperar-senha')
+
+  if (user && redirectAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

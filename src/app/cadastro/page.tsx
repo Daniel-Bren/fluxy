@@ -49,8 +49,8 @@ function CadastroForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#F9FAFB]">
-      <Card className="w-full max-w-md">
+    <main className="flex min-h-dvh items-center justify-center bg-[#F9FAFB] p-4 sm:p-6">
+      <Card className="w-full max-w-md rounded-lg">
         <CardHeader>
           <CardTitle className="text-2xl text-[#111827]">
             {convite ? 'Criar conta para entrar no grupo' : 'Criar conta no Fluxy'}
