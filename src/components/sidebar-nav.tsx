@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, ArrowLeftRight, History } from 'lucide-react'
+import { LayoutDashboard, ArrowLeftRight, ClipboardCheck, History } from 'lucide-react'
 import { Suspense } from 'react'
 import { Users } from 'lucide-react'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Controle', href: '/dashboard/controle', icon: ClipboardCheck },
   { label: 'Transações', href: '/dashboard/transacoes', icon: ArrowLeftRight },
   { label: 'Histórico', href: '/dashboard/historico', icon: History },
   { label: 'Grupo', href: '/dashboard/grupo', icon: Users },
@@ -48,7 +49,7 @@ function SidebarNavInner() {
   )
 }
 
-export default function SidebarNav({ email }: { email: string }) {
+export default function SidebarNav() {
   return (
     <Suspense fallback={
       <nav className="flex-1 px-3 py-4 space-y-1">
