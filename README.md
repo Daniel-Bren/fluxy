@@ -2,6 +2,8 @@
 
 SaaS de controle financeiro pessoal — simples, visual e moderno.
 
+O projeto passou a ser mantido por meio de orquestração por IA, com decisões, implementação e validação registradas em branches e pull requests.
+
 Fluxy nasceu como projeto de estudo prático de desenvolvimento fullstack e banco de dados, mas com ambição de produto real: uma plataforma que ajuda pessoas a entenderem seu fluxo financeiro de forma intuitiva, sem jargões contábeis.
 
 ---
@@ -32,7 +34,8 @@ Tabelas configuradas com Row Level Security ativo:
 
 - `profiles` — dados do usuário (vinculado ao `auth.users`)
 - `categorias` — categorias globais e pessoais por usuário
-- `transacoes` — movimentações financeiras com tipo, valor, data, categoria e recorrência
+- `contas_a_pagar` — obrigações mensais, recorrências e estado de pagamento
+- `transacoes` — movimentações financeiras realizadas, incluindo saídas geradas pelo pagamento de contas
 
 ---
 
