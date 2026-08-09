@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 type Categoria = {
@@ -37,22 +38,35 @@ export default function FiltrosControle({ categorias }: Props) {
     router.push(`${pathname}?${params.toString()}`)
   }
 
+  function hrefStatus(valor: string) {
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (valor === 'todas') {
+      params.delete('status')
+    } else {
+      params.set('status', valor)
+    }
+
+    const query = params.toString()
+    return query ? `${pathname}?${query}` : pathname
+  }
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <div className="grid grid-cols-4 overflow-hidden rounded-lg border border-gray-200 text-sm">
         {estados.map((estado) => (
-          <button
+          <Link
             key={estado.valor}
-            type="button"
-            onClick={() => atualizar('status', estado.valor)}
-            className={`min-w-0 px-2 py-2 transition-colors sm:px-3 sm:py-1.5 ${
+            href={hrefStatus(estado.valor)}
+            aria-current={statusAtual === estado.valor ? 'page' : undefined}
+            className={`min-w-0 touch-manipulation px-2 py-2 text-center transition-colors sm:px-3 sm:py-1.5 ${
               statusAtual === estado.valor
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-500 hover:bg-gray-50'
             }`}
           >
             {estado.label}
-          </button>
+          </Link>
         ))}
       </div>
 
