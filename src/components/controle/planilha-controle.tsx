@@ -424,6 +424,20 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
 
             <div className="mt-5 space-y-4">
               <div>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="editar_vencimento">
+                  Vencimento
+                </label>
+                <Input
+                  id="editar_vencimento"
+                  name="vencimento"
+                  type="date"
+                  defaultValue={contaEdicao.vencimento}
+                  required
+                  className="mt-2 h-10 rounded-md"
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-700" htmlFor="editar_descricao">
                   Descrição
                 </label>
