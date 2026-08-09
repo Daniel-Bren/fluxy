@@ -6,6 +6,7 @@ import {
   criarConta,
   deletarConta,
   desfazerPagamentoConta,
+  editarConta,
   marcarContaComoPaga,
 } from '@/app/dashboard/controle/actions'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ import {
   AlertTriangle,
   Check,
   CheckCircle2,
+  Pencil,
   Plus,
   RefreshCw,
   RotateCcw,
@@ -31,6 +33,7 @@ type CategoriaRelacao = { nome: string } | { nome: string }[] | null
 
 export type ContaControle = {
   id: string
+  categoria_id: string
   valor: number
   vencimento: string
   descricao: string
@@ -70,6 +73,7 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
   const [vencimento, setVencimento] = useState(hojeIso())
   const [recorrente, setRecorrente] = useState(false)
   const [erro, setErro] = useState('')
+  const [contaEdicao, setContaEdicao] = useState<ContaControle | null>(null)
   const [contaPagamento, setContaPagamento] = useState<ContaControle | null>(null)
   const [dataPagamento, setDataPagamento] = useState(hojeIso())
   const [isPending, startTransition] = useTransition()
@@ -115,6 +119,20 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
     setErro('')
     setContaPagamento(conta)
     setDataPagamento(hojeIso())
+  }
+
+  function abrirEdicao(conta: ContaControle) {
+    setErro('')
+    setContaEdicao(conta)
+  }
+
+  function salvarEdicao(formData: FormData) {
+    if (!contaEdicao) return
+
+    executar(
+      () => editarConta(contaEdicao.id, formData),
+      () => setContaEdicao(null),
+    )
   }
 
   function confirmarPagamento() {
@@ -309,6 +327,16 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => abrirEdicao(conta)}
+                            disabled={isPending}
+                            className="rounded-md p-1.5 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-700"
+                            title="Editar conta"
+                          >
+                            <Pencil size={15} />
+                          </button>
+
                           {conta.status === 'pendente' ? (
                             <button
                               type="button"
@@ -364,6 +392,105 @@ export default function PlanilhaControle({ contas, categorias, grupoId }: Props)
           </table>
         </div>
       </form>
+
+      {contaEdicao && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Fechar edição"
+            className="absolute inset-0 bg-black/45"
+            onClick={() => setContaEdicao(null)}
+          />
+          <form
+            action={salvarEdicao}
+            className="relative z-10 w-full max-w-md rounded-lg bg-white p-5 shadow-xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold text-gray-950">Editar conta</h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  A transação vinculada também será atualizada.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setContaEdicao(null)}
+                className="rounded-md p-1 text-gray-500 hover:bg-gray-100"
+                title="Fechar"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="editar_descricao">
+                  Descrição
+                </label>
+                <Input
+                  id="editar_descricao"
+                  name="descricao"
+                  type="text"
+                  defaultValue={contaEdicao.descricao}
+                  required
+                  className="mt-2 h-10 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="editar_categoria">
+                  Categoria
+                </label>
+                <select
+                  id="editar_categoria"
+                  name="categoria_id"
+                  defaultValue={contaEdicao.categoria_id}
+                  required
+                  className="mt-2 h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none focus:border-gray-400"
+                >
+                  {categorias.map((categoria) => (
+                    <option key={categoria.id} value={categoria.id}>
+                      {categoria.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700" htmlFor="editar_valor">
+                  Valor
+                </label>
+                <Input
+                  id="editar_valor"
+                  name="valor"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  defaultValue={Number(contaEdicao.valor)}
+                  required
+                  className="mt-2 h-10 rounded-md"
+                />
+              </div>
+
+              {erro && (
+                <div className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                  {erro}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setContaEdicao(null)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isPending} className="bg-blue-700 hover:bg-blue-800">
+                <Check size={16} />
+                Salvar alterações
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {contaPagamento && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

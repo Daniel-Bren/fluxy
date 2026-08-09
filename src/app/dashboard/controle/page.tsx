@@ -48,6 +48,7 @@ export default async function ControlePage({ searchParams }: Props) {
     .from('contas_a_pagar')
     .select(`
       id,
+      categoria_id,
       valor,
       vencimento,
       descricao,

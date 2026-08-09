@@ -61,6 +61,33 @@ export async function criarConta(formData: FormData) {
   return { sucesso: true as const }
 }
 
+export async function editarConta(id: string, formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { erro: 'Não autenticado' }
+
+  const valor = Number(formData.get('valor'))
+  const categoriaId = String(formData.get('categoria_id') ?? '')
+  const descricao = String(formData.get('descricao') ?? '').trim()
+
+  if (!valor || valor <= 0 || !categoriaId || !descricao) {
+    return { erro: 'Preencha descrição, valor e categoria.' }
+  }
+
+  const { error } = await supabase.rpc('editar_conta_a_pagar', {
+    p_conta_id: id,
+    p_categoria_id: categoriaId,
+    p_descricao: descricao,
+    p_valor: valor,
+  })
+
+  if (error) return { erro: error.message }
+
+  revalidarControle()
+  return { sucesso: true as const }
+}
+
 export async function marcarContaComoPaga(id: string, dataPagamento: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
