@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import PlanilhaTransacoes from '@/components/transacoes/planilha-transacoes'
-import type { CategoriaPlanilha, TransacaoPlanilha } from '@/components/transacoes/planilha-transacoes'
+import NovaTransacaoModal from '@/components/transacoes/nova-transacao-modal'
+import ListaTransacoes from '@/components/transacoes/lista-transacoes'
+import type { TransacaoLista } from '@/components/transacoes/lista-transacoes'
 import SeletorMes from '@/components/seletor-mes'
 import FiltrosTransacoes from '@/components/transacoes/filtros-transacoes'
 import ToggleModo from '@/components/toggle-modo'
@@ -73,9 +74,9 @@ export default async function TransacoesPage({ searchParams }: Props) {
     <div className="space-y-5 p-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#111827]">Planilha mensal</h1>
-          <p className="mt-1 text-[#6B7280]">
-            Lance, revise e acompanhe as movimentações do mês em uma visão única.
+          <h1 className="text-2xl font-bold text-gray-950">Transações</h1>
+          <p className="mt-1 text-gray-500">
+            Registre e consulte as entradas e saídas realizadas.
           </p>
         </div>
 
@@ -88,6 +89,10 @@ export default async function TransacoesPage({ searchParams }: Props) {
           <Suspense fallback={<div className="w-48 h-8 bg-gray-100 rounded-lg animate-pulse" />}>
             <SeletorMes />
           </Suspense>
+          <NovaTransacaoModal
+            categorias={categorias ?? []}
+            grupoId={modoCompartilhado ? grupoId : null}
+          />
         </div>
       </div>
 
@@ -97,11 +102,9 @@ export default async function TransacoesPage({ searchParams }: Props) {
         </Suspense>
       </div>
 
-      <PlanilhaTransacoes
-        transacoes={(transacoes ?? []) as TransacaoPlanilha[]}
-        categorias={(categorias ?? []) as CategoriaPlanilha[]}
-        grupoId={modoCompartilhado ? grupoId : null}
-      />
+      <div className="rounded-lg border border-gray-200 bg-white p-5">
+        <ListaTransacoes transacoes={(transacoes ?? []) as TransacaoLista[]} />
+      </div>
     </div>
   )
 }

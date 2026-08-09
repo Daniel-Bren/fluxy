@@ -3,6 +3,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+function adicionarMes(data: string, deslocamento: number) {
+  const [ano, mes, dia] = data.split('-').map(Number)
+  const mesAlvo = new Date(Date.UTC(ano, mes - 1 + deslocamento, 1))
+  const ultimoDia = new Date(
+    Date.UTC(mesAlvo.getUTCFullYear(), mesAlvo.getUTCMonth() + 1, 0),
+  ).getUTCDate()
+  const diaAlvo = Math.min(dia, ultimoDia)
+
+  return `${mesAlvo.getUTCFullYear()}-${String(mesAlvo.getUTCMonth() + 1).padStart(2, '0')}-${String(diaAlvo).padStart(2, '0')}`
+}
+
 export async function criarTransacao(formData: FormData) {
   const supabase = await createClient()
 
@@ -26,17 +37,12 @@ export async function criarTransacao(formData: FormData) {
     const recorrencia_id = crypto.randomUUID()
     const registros = []
 
-    const [ano, mes, dia] = data.split('-').map(Number)
-
     for (let i = 0; i < mesesRecorrencia; i++) {
-      const novaData = new Date(ano, mes - 1 + i, dia)
-      const dataFormatada = `${novaData.getFullYear()}-${String(novaData.getMonth() + 1).padStart(2, '0')}-${String(novaData.getDate()).padStart(2, '0')}`
-
-        registros.push({
+      registros.push({
         user_id: user.id,
         tipo,
         valor,
-        data: dataFormatada,
+        data: adicionarMes(data, i),
         categoria_id,
         descricao,
         recorrente: true,
@@ -73,6 +79,17 @@ export async function deletarTransacao(id: string) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { erro: 'Não autenticado' }
+
+  const { data: transacao, error: erroConsulta } = await supabase
+    .from('transacoes')
+    .select('conta_a_pagar_id')
+    .eq('id', id)
+    .single()
+
+  if (erroConsulta) return { erro: erroConsulta.message }
+  if (transacao.conta_a_pagar_id) {
+    return { erro: 'Desfaça o pagamento na tela Controle antes de excluir esta transação.' }
+  }
 
   const { error } = await supabase
     .from('transacoes')
