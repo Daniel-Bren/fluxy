@@ -1,6 +1,8 @@
 'use client'
 
+import { useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { salvarModoPreferido, type ModoFinanceiro } from '@/app/dashboard/actions'
 import { Users, User } from 'lucide-react'
 
 export default function ToggleModo() {
@@ -8,20 +10,34 @@ export default function ToggleModo() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const modo = searchParams.get('modo') ?? 'pessoal'
+  const modoUrl: ModoFinanceiro = searchParams.get('modo') === 'compartilhado'
+    ? 'compartilhado'
+    : 'pessoal'
+  const [isPending, startTransition] = useTransition()
 
-  function alternar(novoModo: string) {
+  function alternar(novoModo: ModoFinanceiro) {
+    if (novoModo === modoUrl) return
+
     const params = new URLSearchParams(searchParams.toString())
     params.set('modo', novoModo)
-    router.push(`${pathname}?${params.toString()}`)
+
+    startTransition(async () => {
+      const resultado = await salvarModoPreferido(novoModo)
+
+      if (resultado?.erro) return
+
+      router.replace(`${pathname}?${params.toString()}`)
+    })
   }
 
   return (
     <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm">
       <button
+        type="button"
         onClick={() => alternar('pessoal')}
+        disabled={isPending}
         className={`flex items-center gap-2 px-4 py-2 transition-colors ${
-          modo === 'pessoal'
+          modoUrl === 'pessoal'
             ? 'bg-[#2563EB] text-white'
             : 'text-[#6B7280] hover:bg-gray-50'
         }`}
@@ -30,9 +46,11 @@ export default function ToggleModo() {
         Pessoal
       </button>
       <button
+        type="button"
         onClick={() => alternar('compartilhado')}
+        disabled={isPending}
         className={`flex items-center gap-2 px-4 py-2 transition-colors ${
-          modo === 'compartilhado'
+          modoUrl === 'compartilhado'
             ? 'bg-[#2563EB] text-white'
             : 'text-[#6B7280] hover:bg-gray-50'
         }`}

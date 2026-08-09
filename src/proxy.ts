@@ -41,6 +41,23 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
+  const isDashboard = request.nextUrl.pathname.startsWith('/dashboard')
+  const temModoNaUrl = request.nextUrl.searchParams.has('modo')
+
+  if (user && isDashboard && !temModoNaUrl) {
+    const modoSalvo = request.cookies.get('fluxy_modo')?.value
+    const modo = modoSalvo === 'compartilhado' ? 'compartilhado' : 'pessoal'
+    const url = request.nextUrl.clone()
+    url.searchParams.set('modo', modo)
+
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie)
+    })
+
+    return redirectResponse
+  }
+
   return supabaseResponse
 }
 
