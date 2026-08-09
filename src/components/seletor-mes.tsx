@@ -27,7 +27,7 @@ export default function SeletorMes() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
       <button
         onClick={() => navegar('anterior')}
         className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-[#6B7280]"
@@ -35,7 +35,7 @@ export default function SeletorMes() {
         <ChevronLeft size={18} />
       </button>
 
-      <span className="text-sm font-medium text-[#111827] capitalize min-w-[140px] text-center">
+      <span className="min-w-0 flex-1 text-center text-sm font-medium capitalize text-[#111827] sm:min-w-[140px] sm:flex-none">
         {label}
       </span>
 

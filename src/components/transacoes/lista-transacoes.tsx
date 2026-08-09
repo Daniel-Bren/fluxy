@@ -67,16 +67,16 @@ export default function ListaTransacoes({ transacoes }: Props) {
           key={t.id}
           className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             {t.tipo === 'entrada' ? (
               <ArrowDownCircle size={22} className="text-[#16A34A]" />
             ) : (
               <ArrowUpCircle size={22} className="text-[#DC2626]" />
             )}
 
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-[#111827]">
+            <div className="min-w-0">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <p className="truncate text-sm font-medium text-[#111827]">
                   {t.descricao || nomeCategoria(t.categorias)}
                 </p>
                 {t.recorrente && (

@@ -5,6 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import GrupoClient from './grupo-client'
 
+type Grupo = {
+  id: string
+  nome: string
+  dono_id?: string
+}
+
+type MembroGrupo = {
+  user_id: string
+  nome: string | null
+}
+
 export default async function GrupoPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -21,7 +32,8 @@ export default async function GrupoPage() {
     .eq('user_id', user!.id)
     .single()
 
-  const grupo = grupoProrio ?? (membroGrupo?.grupos as any)
+  const grupoComoMembro = membroGrupo?.grupos as unknown as Grupo | null
+  const grupo = grupoProrio ?? grupoComoMembro
   const isDono = !!grupoProrio
 
   const { data: membros } = grupo
@@ -29,14 +41,14 @@ export default async function GrupoPage() {
     : { data: null }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl font-bold text-[#111827]">Grupo</h1>
         <p className="text-[#6B7280] mt-1">Gerencie seu grupo compartilhado.</p>
       </div>
 
       {!grupo ? (
-        <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm max-w-md">
+        <div className="w-full max-w-md rounded-lg border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
               <Users size={20} className="text-[#2563EB]" />
@@ -62,9 +74,9 @@ export default async function GrupoPage() {
           </form>
         </div>
       ) : (
-        <div className="space-y-6 max-w-lg">
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
+        <div className="w-full max-w-lg space-y-4 sm:space-y-6">
+          <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
+            <div className="mb-4 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
               <div>
                 <p className="font-semibold text-[#111827] text-lg">{grupo.nome}</p>
                 <p className="text-sm text-[#6B7280]">{membros?.length ?? 0} membros</p>
@@ -83,17 +95,17 @@ export default async function GrupoPage() {
             </div>
 
             <div className="space-y-2">
-              {(membros as any[])?.map((m) => (
-                <div key={m.user_id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                  <div className="flex items-center gap-2">
+              {(membros as unknown as MembroGrupo[])?.map((m) => (
+                <div key={m.user_id} className="flex items-center justify-between gap-3 border-b border-gray-50 py-2 last:border-0">
+                  <div className="flex min-w-0 items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-xs font-medium text-[#2563EB]">
                       {m.nome?.[0]?.toUpperCase() ?? '?'}
                     </div>
-                    <span className="text-sm text-[#111827]">{m.nome ?? 'Usuário'}</span>
+                    <span className="truncate text-sm text-[#111827]">{m.nome ?? 'Usuário'}</span>
                     {isDono && m.user_id === user!.id && (
                       <span className="text-xs bg-blue-50 text-[#2563EB] px-2 py-0.5 rounded-full">dono</span>
                     )}
-                    {!isDono && m.user_id === (membroGrupo?.grupos as any)?.dono_id && (
+                    {!isDono && m.user_id === grupoComoMembro?.dono_id && (
                       <span className="text-xs bg-blue-50 text-[#2563EB] px-2 py-0.5 rounded-full">dono</span>
                     )}
                   </div>
@@ -113,7 +125,7 @@ export default async function GrupoPage() {
           </div>
 
           {isDono && (
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
               <p className="font-semibold text-[#111827] mb-1">Convidar pessoa</p>
               <p className="text-sm text-[#6B7280] mb-4">
                 Gere um link de convite e compartilhe com quem quiser adicionar ao grupo.

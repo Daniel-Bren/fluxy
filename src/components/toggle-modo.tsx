@@ -31,12 +31,12 @@ export default function ToggleModo() {
   }
 
   return (
-    <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm">
+    <div className="grid w-full grid-cols-2 overflow-hidden rounded-lg border border-gray-200 text-sm sm:w-auto">
       <button
         type="button"
         onClick={() => alternar('pessoal')}
         disabled={isPending}
-        className={`flex items-center gap-2 px-4 py-2 transition-colors ${
+        className={`flex min-w-0 items-center justify-center gap-2 px-3 py-2 transition-colors sm:px-4 ${
           modoUrl === 'pessoal'
             ? 'bg-[#2563EB] text-white'
             : 'text-[#6B7280] hover:bg-gray-50'
@@ -49,7 +49,7 @@ export default function ToggleModo() {
         type="button"
         onClick={() => alternar('compartilhado')}
         disabled={isPending}
-        className={`flex items-center gap-2 px-4 py-2 transition-colors ${
+        className={`flex min-w-0 items-center justify-center gap-2 px-3 py-2 transition-colors sm:px-4 ${
           modoUrl === 'compartilhado'
             ? 'bg-[#2563EB] text-white'
             : 'text-[#6B7280] hover:bg-gray-50'
