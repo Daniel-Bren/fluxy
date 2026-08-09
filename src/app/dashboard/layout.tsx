@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { logout } from './actions'
 import { LogOut } from 'lucide-react'
 import SidebarNav from '@/components/sidebar-nav'
+import Image from 'next/image'
 
 export default async function DashboardLayout({
   children,
@@ -23,9 +24,11 @@ export default async function DashboardLayout({
         {/* Logo */}
         <div className="px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <img
+            <Image
               src="/android-chrome-192x192.png"
               alt="Fluxy"
+              width={28}
+              height={28}
               className="w-7 h-7 rounded-lg"
             />
             <span className="text-white text-xl font-bold tracking-tight">Fluxy</span>
@@ -33,7 +36,7 @@ export default async function DashboardLayout({
         </div>
 
         {/* Navegação */}
-        <SidebarNav email={user!.email ?? ''} />
+        <SidebarNav />
 
         {/* Usuário + Logout */}
         <div className="px-3 py-4 border-t border-white/10">
