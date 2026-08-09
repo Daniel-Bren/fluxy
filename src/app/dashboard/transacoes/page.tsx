@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import NovaTransacaoModal from '@/components/transacoes/nova-transacao-modal'
-import ListaTransacoes from '@/components/transacoes/lista-transacoes'
+import PlanilhaTransacoes from '@/components/transacoes/planilha-transacoes'
+import type { CategoriaPlanilha, TransacaoPlanilha } from '@/components/transacoes/planilha-transacoes'
 import SeletorMes from '@/components/seletor-mes'
 import FiltrosTransacoes from '@/components/transacoes/filtros-transacoes'
 import ToggleModo from '@/components/toggle-modo'
@@ -70,16 +70,16 @@ export default async function TransacoesPage({ searchParams }: Props) {
   const { data: transacoes } = await query
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-5 p-8">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#111827]">Transações</h1>
-          <p className="text-[#6B7280] mt-1">
-            Gerencie suas entradas e saídas
+          <h1 className="text-2xl font-bold text-[#111827]">Planilha mensal</h1>
+          <p className="mt-1 text-[#6B7280]">
+            Lance, revise e acompanhe as movimentações do mês em uma visão única.
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           {grupoId && (
             <Suspense fallback={<div className="w-40 h-9 bg-gray-100 rounded-lg animate-pulse" />}>
               <ToggleModo />
@@ -88,19 +88,20 @@ export default async function TransacoesPage({ searchParams }: Props) {
           <Suspense fallback={<div className="w-48 h-8 bg-gray-100 rounded-lg animate-pulse" />}>
             <SeletorMes />
           </Suspense>
-          <NovaTransacaoModal categorias={categorias ?? []} grupoId={modoCompartilhado ? grupoId : null} />
         </div>
       </div>
 
-      <div className="mb-4">
+      <div>
         <Suspense fallback={<div className="w-full h-9 bg-gray-100 rounded-lg animate-pulse" />}>
           <FiltrosTransacoes categorias={categorias ?? []} />
         </Suspense>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <ListaTransacoes transacoes={(transacoes ?? []) as any} />
-      </div>
+      <PlanilhaTransacoes
+        transacoes={(transacoes ?? []) as TransacaoPlanilha[]}
+        categorias={(categorias ?? []) as CategoriaPlanilha[]}
+        grupoId={modoCompartilhado ? grupoId : null}
+      />
     </div>
   )
 }

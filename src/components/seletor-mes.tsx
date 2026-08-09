@@ -21,7 +21,9 @@ export default function SeletorMes() {
   function navegar(direcao: 'anterior' | 'proximo') {
     const nova = new Date(ano, direcao === 'anterior' ? mes - 1 : mes + 1, 1)
     const param = `${nova.getFullYear()}-${String(nova.getMonth() + 1).padStart(2, '0')}`
-    router.push(`${pathname}?mes=${param}`)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('mes', param)
+    router.push(`${pathname}?${params.toString()}`)
   }
 
   return (
